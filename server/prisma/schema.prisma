@@ -1,0 +1,222 @@
+// ======================================================
+// NOTE MANAGEMENT APPLICATION
+// Final Project - Web Programming & Applications
+// Database: MySQL 8
+// ORM: Prisma 7
+// ======================================================
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}
+
+// ======================================================
+// ENUMS
+// ======================================================
+
+enum FontSize {
+  sm
+  md
+  lg
+}
+
+enum Theme {
+  light
+  dark
+}
+
+enum ViewMode {
+  grid
+  list
+}
+
+enum SharePermission {
+  read
+  edit
+}
+
+// ======================================================
+// MEMBER A - ACCOUNT MANAGEMENT
+// ======================================================
+
+model User {
+  id            Int     @id @default(autoincrement())
+  email         String  @unique @db.VarChar(254)
+  display_name  String  @db.VarChar(100)
+  password_hash String  @db.VarChar(255)
+  avatar_url    String? @db.VarChar(2048)
+
+  is_verified   Boolean @default(false)
+  verify_token  String? @unique @db.VarChar(191)
+  token_version Int     @default(0)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Relationships
+  preferences     UserPreference?
+  password_resets PasswordReset[]
+  notes           Note[]
+  labels          Label[]
+
+  owned_shares    NoteShare[] @relation("ShareOwner")
+  received_shares NoteShare[] @relation("ShareRecipient")
+
+  @@map("users")
+}
+
+// ======================================================
+// MEMBER A - USER PREFERENCES
+// ======================================================
+
+model UserPreference {
+  user_id            Int      @id
+  font_size          FontSize @default(md)
+  theme              Theme    @default(light)
+  default_note_color String?  @db.VarChar(32)
+  view_mode          ViewMode @default(grid)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Restrict)
+
+  @@map("user_preferences")
+}
+
+// ======================================================
+// MEMBER A - PASSWORD RESET
+// ======================================================
+
+model PasswordReset {
+  id         Int      @id @default(autoincrement())
+  user_id    Int
+  otp_hash   String   @db.VarChar(255)
+  expires_at DateTime
+  used       Boolean  @default(false)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Restrict)
+
+  @@index([user_id, used, expires_at])
+  @@map("password_resets")
+}
+
+// ======================================================
+// MEMBER B - BASIC NOTE MANAGEMENT
+// ======================================================
+
+model Note {
+  id            Int       @id @default(autoincrement())
+  user_id       Int
+  title         String    @db.VarChar(255)
+  content       String    @db.Text
+  color         String?   @db.VarChar(32)
+  pinned_at     DateTime?
+  password_hash String?   @db.VarChar(255)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Restrict)
+
+  attachments Attachment[]
+  note_labels NoteLabel[]
+  shares      NoteShare[]
+  embedding   NoteEmbedding?
+
+  @@index([user_id, pinned_at, updated_at])
+  @@map("notes")
+}
+
+// ======================================================
+// MEMBER B - ATTACHMENTS
+// ======================================================
+
+model Attachment {
+  id         Int      @id @default(autoincrement())
+  note_id    Int
+  file_url   String   @db.VarChar(2048)
+  file_name  String   @db.VarChar(255)
+  mime_type  String   @db.VarChar(100)
+  size       Int
+  created_at DateTime @default(now())
+
+  note Note @relation(fields: [note_id], references: [id], onDelete: Cascade)
+
+  @@index([note_id])
+  @@map("attachments")
+}
+
+// ======================================================
+// MEMBER A - LABEL MANAGEMENT
+// ======================================================
+
+model Label {
+  id      Int    @id @default(autoincrement())
+  user_id Int
+  name    String @db.VarChar(100)
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Restrict)
+
+  note_labels NoteLabel[]
+
+  @@unique([user_id, name])
+  @@map("labels")
+}
+
+// ======================================================
+// MEMBER A - NOTE LABEL RELATIONSHIP
+// ======================================================
+
+model NoteLabel {
+  note_id  Int
+  label_id Int
+
+  note Note @relation(fields: [note_id], references: [id], onDelete: Cascade)
+
+  label Label @relation(fields: [label_id], references: [id], onDelete: Cascade)
+
+  @@id([note_id, label_id])
+  @@index([label_id])
+  @@map("note_labels")
+}
+
+// ======================================================
+// MEMBER C - NOTE SHARING
+// ======================================================
+
+model NoteShare {
+  id           Int             @id @default(autoincrement())
+  note_id      Int
+  owner_id     Int
+  recipient_id Int
+  permission   SharePermission
+  shared_at    DateTime        @default(now())
+  seen         Boolean         @default(false)
+
+  note Note @relation(fields: [note_id], references: [id], onDelete: Cascade)
+
+  owner User @relation("ShareOwner", fields: [owner_id], references: [id], onDelete: Restrict)
+
+  recipient User @relation("ShareRecipient", fields: [recipient_id], references: [id], onDelete: Restrict)
+
+  @@unique([note_id, recipient_id])
+  @@index([owner_id])
+  @@index([recipient_id, seen])
+  @@map("note_shares")
+}
+
+// ======================================================
+// MEMBER C - AI EMBEDDINGS
+// ======================================================
+
+model NoteEmbedding {
+  note_id    Int      @id
+  vector     Json
+  updated_at DateTime @updatedAt
+
+  note Note @relation(fields: [note_id], references: [id], onDelete: Cascade)
+
+  @@map("note_embeddings")
+}

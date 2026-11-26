@@ -38,3 +38,6 @@ node_modules/
 dist/
 build/
 *.log
+
+# Prisma generated client
+server/src/generated/prisma/
