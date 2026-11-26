@@ -1,0 +1,40 @@
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+logs/
+
+# Testing
+coverage/
+
+# Operating system
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+
+# Temporary uploads
+uploads/
+tmp/
+
+.env
+.env.*
+!.env.example
+
+node_modules/
+dist/
+build/
+*.log

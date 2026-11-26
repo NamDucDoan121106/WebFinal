@@ -1,0 +1,28 @@
+services:
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Required}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Required}
+      MYSQL_USER: ${MYSQL_USER:?Required}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Required}
+
+    ports:
+      - "127.0.0.1:3307:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - 'mysqladmin ping -h localhost --silent'
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+volumes:
+  mysql_data:
