@@ -1,35 +1,206 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
 
-function App() {
-  const [count, setCount] = useState(0)
+import {
+    BrowserRouter,
+    Routes,
+    Route,
+    Navigate
+} from "react-router-dom";
 
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+import {
+    AuthProvider,
+    useAuth
+} from "./auth/AuthContext.jsx";
+
+import AuthPage from "./auth/AuthPages.jsx";
+import ProtectedRoute from "./auth/ProtectedRoute.jsx";
+import VerifyPage from "./auth/VerifyPage.jsx";
+import UnverifiedBanner from "./auth/UnverifiedBanner.jsx";
+
+import "./App.css";
+import "./auth/auth.css";
+
+// ==========================================
+// TEMPORARY DASHBOARD
+// ==========================================
+
+function Dashboard() {
+    const {
+        user,
+        notice,
+        logout
+    } = useAuth();
+
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState("");
+
+    async function handleLogout() {
+        if (submitting) return;
+
+        setError("");
+        setSubmitting(true);
+
+        try {
+            await logout();
+        } catch (err) {
+            setError(
+                err.response?.data?.message ||
+                "Unable to sign out. Please try again."
+            );
+        } finally {
+            setSubmitting(false);
+        }
+    }
+
+    return (
+        <main className="home-page">
+
+            <header className="home-header">
+                <h1>Note App</h1>
+
+                <button
+                    type="button"
+                    onClick={handleLogout}
+                    disabled={submitting}
+                >
+                    {submitting
+                        ? "Signing out..."
+                        : "Sign out"}
+                </button>
+            </header>
+
+            <UnverifiedBanner />
+
+            {notice && (
+                <div
+                    className="auth-success"
+                    role="status"
+                >
+                    {notice}
+                </div>
+            )}
+
+            {error && (
+                <div
+                    className="auth-error"
+                    role="alert"
+                >
+                    {error}
+                </div>
+            )}
+
+            <section className="welcome-card">
+
+                <h2>
+                    Welcome, {user?.display_name || "User"}!
+                </h2>
+
+                <p>
+                    Your account is connected successfully.
+                </p>
+
+                <div className="user-information">
+
+                    <p>
+                        <strong>User ID:</strong>{" "}
+                        {user?.id}
+                    </p>
+
+                    <p>
+                        <strong>Display name:</strong>{" "}
+                        {user?.display_name}
+                    </p>
+
+                    <p>
+                        <strong>Email:</strong>{" "}
+                        {user?.email}
+                    </p>
+
+                    <p>
+                        <strong>Account status:</strong>{" "}
+                        {user?.is_verified
+                            ? "Verified"
+                            : "Not verified"}
+                    </p>
+
+                </div>
+
+                <hr />
+
+                <h3>Your notes</h3>
+
+                <p>
+                    Note management features will be
+                    integrated in the next phase.
+                </p>
+
+            </section>
+
+        </main>
+    );
 }
 
-export default App
+// ==========================================
+// APPLICATION ROUTING
+// ==========================================
+
+export default function App() {
+    return (
+        <BrowserRouter>
+            <AuthProvider>
+
+                <Routes>
+
+                    {/* Public routes */}
+
+                    <Route
+                        path="/login"
+                        element={
+                            <AuthPage
+                                key="login"
+                                mode="login"
+                            />
+                        }
+                    />
+
+                    <Route
+                        path="/register"
+                        element={
+                            <AuthPage
+                                key="register"
+                                mode="register"
+                            />
+                        }
+                    />
+
+                    <Route
+                        path="/verify/:token"
+                        element={<VerifyPage />}
+                    />
+
+                    {/* Protected routes */}
+
+                    <Route element={<ProtectedRoute />}>
+
+                        <Route
+                            path="/"
+                            element={<Dashboard />}
+                        />
+
+                    </Route>
+
+                    {/* Fallback route */}
+
+                    <Route
+                        path="*"
+                        element={
+                            <Navigate to="/" replace />
+                        }
+                    />
+
+                </Routes>
+
+            </AuthProvider>
+        </BrowserRouter>
+    );
+}

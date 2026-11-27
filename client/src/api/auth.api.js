@@ -1,25 +1,15 @@
 import http from "./http.js";
 
 export const authApi = {
-    register(data) {
-        return http.post("/auth/register", data);
-    },
+    register: data => http.post("/auth/register", data),
 
-    login(data) {
-        return http.post("/auth/login", data);
-    },
+    login: data => http.post("/auth/login", data),
 
-    logout() {
-        return http.post("/auth/logout");
-    },
+    logout: () => http.post("/auth/logout"),
 
-    me() {
-        return http.get("/auth/me");
-    },
+    me: () => http.get("/auth/me"),
 
-    verify(token) {
-        return http.get(
-            `/auth/verify/${encodeURIComponent(token)}`
-        );
-    }
+    verify: token => http.get(
+        `/auth/verify/${token}`
+    )
 };
