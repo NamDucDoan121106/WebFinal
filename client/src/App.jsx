@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 
 import {
@@ -16,6 +17,7 @@ import AuthPage from "./auth/AuthPages.jsx";
 import ProtectedRoute from "./auth/ProtectedRoute.jsx";
 import VerifyPage from "./auth/VerifyPage.jsx";
 import UnverifiedBanner from "./auth/UnverifiedBanner.jsx";
+import ForgotPassword from "./auth/ForgotPassword.jsx";
 
 import "./App.css";
 import "./auth/auth.css";
@@ -25,11 +27,7 @@ import "./auth/auth.css";
 // ==========================================
 
 function Dashboard() {
-    const {
-        user,
-        notice,
-        logout
-    } = useAuth();
+    const { user, notice, logout } = useAuth();
 
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
@@ -148,10 +146,11 @@ export default function App() {
     return (
         <BrowserRouter>
             <AuthProvider>
-
                 <Routes>
 
-                    {/* Public routes */}
+                    {/* ========================== */}
+                    {/* PUBLIC ROUTES              */}
+                    {/* ========================== */}
 
                     <Route
                         path="/login"
@@ -173,12 +172,23 @@ export default function App() {
                         }
                     />
 
+                    {/* Email verification */}
+
                     <Route
                         path="/verify/:token"
                         element={<VerifyPage />}
                     />
 
-                    {/* Protected routes */}
+                    {/* Forgot and reset password */}
+
+                    <Route
+                        path="/forgot-password"
+                        element={<ForgotPassword />}
+                    />
+
+                    {/* ========================== */}
+                    {/* PROTECTED ROUTES           */}
+                    {/* ========================== */}
 
                     <Route element={<ProtectedRoute />}>
 
@@ -189,7 +199,9 @@ export default function App() {
 
                     </Route>
 
-                    {/* Fallback route */}
+                    {/* ========================== */}
+                    {/* FALLBACK ROUTE             */}
+                    {/* ========================== */}
 
                     <Route
                         path="*"
@@ -199,7 +211,6 @@ export default function App() {
                     />
 
                 </Routes>
-
             </AuthProvider>
         </BrowserRouter>
     );

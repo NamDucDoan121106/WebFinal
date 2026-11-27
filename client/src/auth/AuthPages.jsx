@@ -2,7 +2,8 @@ import { useState } from "react";
 
 import {
     Link,
-    Navigate
+    Navigate,
+    useLocation
 } from "react-router-dom";
 
 import { useAuth } from "./AuthContext.jsx";
@@ -11,6 +12,10 @@ import "./auth.css";
 
 export default function AuthPage({ mode }) {
     const isRegister = mode === "register";
+    const location = useLocation();
+
+    const successMessage =
+    location.state?.message || "";
 
     const {
         status,
@@ -94,7 +99,14 @@ export default function AuthPage({ mode }) {
                             : "Sign in to access your notes."}
                     </p>
                 </header>
-
+                {!isRegister && successMessage && (
+                    <div
+                        className="auth-success"
+                        role="status"
+                    >
+                        {successMessage}
+                    </div>
+                )}
                 {error && (
                     <div
                         className="auth-error"
@@ -197,6 +209,20 @@ export default function AuthPage({ mode }) {
                 </form>
 
                 <footer className="auth-footer">
+                    {!isRegister && (
+                        <div style={{ textAlign: "right" }}>
+                            <Link
+                                to="/forgot-password"
+                                style={{
+                                    color: "#2563eb",
+                                    fontSize: "14px",
+                                    textDecoration: "none"
+                                }}
+                            >
+                                Forgot password?
+                            </Link>
+                        </div>
+                    )}
                     {isRegister ? (
                         <>
                             Already have an account?{" "}
