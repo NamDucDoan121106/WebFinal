@@ -8,7 +8,8 @@ function Test-Result($name, $condition) {
     if ($condition) {
         Write-Host "[PASS] $name" -ForegroundColor Green
         $script:passed++
-    } else {
+    }
+    else {
         Write-Host "[FAIL] $name" -ForegroundColor Red
         $script:failed++
     }
@@ -18,7 +19,8 @@ function Test-HttpError($name, $expected, $action) {
     try {
         & $action | Out-Null
         Test-Result $name $false
-    } catch {
+    }
+    catch {
         $response = $_.Exception.Response
         if ($null -eq $response) {
             Test-Result $name $false
@@ -38,13 +40,26 @@ Test-HttpError "Unauthenticated access" 401 {
 }
 
 # Enter a new, real email address
-$email = Read-Host "Enter an unused email address"
+do {
+    $email = (
+        Read-Host "Enter a valid unused email address"
+    ).Trim()
+
+    $validEmail = $email -match '^[^@\s]+@[^@\s]+\.[^@\s]+$'
+
+    if (-not $validEmail) {
+        Write-Host `
+            "Invalid email. Please enter a valid email address." `
+            -ForegroundColor Red
+    }
+
+} until ($validEmail)
 $password = "Test!" + [guid]::NewGuid().ToString("N")
 
 $registerBody = @{
-    email = $email
-    display_name = "Authentication Test"
-    password = $password
+    email            = $email
+    display_name     = "Authentication Test"
+    password         = $password
     confirm_password = $password
 } | ConvertTo-Json
 
@@ -101,7 +116,7 @@ Test-HttpError "Duplicate email" 409 {
 
 # Test 8: Wrong password
 $wrongBody = @{
-    email = $email
+    email    = $email
     password = "IncorrectPassword!"
 } | ConvertTo-Json
 
@@ -137,7 +152,8 @@ if ($token) {
     Test-HttpError "Activation token reuse" 400 {
         Invoke-RestMethod "$base/api/auth/verify/$token"
     }
-} else {
+}
+else {
     Write-Host "[SKIP] 3 activation tests" -ForegroundColor Yellow
 }
 
@@ -158,7 +174,7 @@ Test-HttpError "Access after logout" 401 {
 
 # Test 14: Login
 $loginBody = @{
-    email = $email
+    email    = $email
     password = $password
 } | ConvertTo-Json
 
