@@ -1,3 +1,6 @@
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import { existsSync } from "node:fs";
 import noteLabelRoutes
     from "./routes/note-label.routes.js";
 import labelRoutes from "./routes/label.routes.js";
@@ -17,20 +20,45 @@ import {
 } from "./middleware/error.middleware.js";
 
 const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
+const clientDist = path.resolve(
+    __dirname,
+    "../../client/dist"
+);
+
+const serveClient =
+    env.NODE_ENV === "production" ||
+    process.env.SERVE_CLIENT === "true";
 // ==========================================
 // SECURITY AND GLOBAL MIDDLEWARE
 // ==========================================
 
 app.disable("x-powered-by");
 
-app.use(
-    helmet({
-        referrerPolicy: {
-            policy: "no-referrer"
+app.use(helmet({
+    referrerPolicy: {
+        policy: "no-referrer"
+    },
+
+    contentSecurityPolicy: {
+        directives: {
+            imgSrc: [
+                "'self'",
+                "data:",
+                "blob:",
+                "https://res.cloudinary.com"
+            ],
+
+            mediaSrc: [
+                "'self'",
+                "blob:",
+                "https://res.cloudinary.com"
+            ]
         }
-    })
-);
+    }
+}));
 
 app.use(
     express.json({
@@ -124,13 +152,44 @@ app.use("/api/notes", noteLabelRoutes);
 // ==========================================
 // UNKNOWN ROUTES
 // ==========================================
+app.get("/healthz", (req, res) => {
+    res.status(200).json({
+        success: true,
+        status: "healthy"
+    });
+});
+// Unknown API requests must return JSON.
+app.use("/api", notFound);
+
+// Serve React production build.
+if (serveClient) {
+    if (!existsSync(
+        path.join(clientDist, "index.html")
+    )) {
+        throw new Error(
+            "React production build not found."
+        );
+    }
+
+    app.use(express.static(clientDist, {
+        index: false
+    }));
+
+    // React Router fallback for Express 5.
+    app.get("/{*splat}", (req, res, next) => {
+        if (!req.accepts("html")) {
+            return next();
+        }
+
+        res.set("Cache-Control", "no-cache");
+
+        return res.sendFile(
+            path.join(clientDist, "index.html")
+        );
+    });
+}
 
 app.use(notFound);
-
-// ==========================================
-// GLOBAL ERROR HANDLING
-// ==========================================
-
 app.use(errorHandler);
 
 export default app;

@@ -1,59 +1,69 @@
-import { readFileSync } from "node:fs";
-import dotenv from "dotenv";
-import { PrismaMariaDb }
-    from "@prisma/adapter-mariadb";
 
-import { PrismaClient }
-    from "../generated/prisma/client.ts";
+import {
+    PrismaMariaDb
+} from "@prisma/adapter-mariadb";
 
-import { env } from "./env.js";
+import {
+    PrismaClient
+} from "../generated/prisma/client.ts";
 
-const url = new URL(env.DATABASE_URL);
+import {
+    resolveDatabaseConfig
+} from "./database.js";
 
-if (url.protocol !== "mysql:") {
-    throw new Error("Expected a MySQL database URL.");
-}
+// ==========================================
+// DATABASE CONFIGURATION
+// ==========================================
 
-// Load database configuration from root .env
-const dbEnv = dotenv.parse(
-    readFileSync(
-        new URL("../../../.env", import.meta.url)
-    )
-);
+const config = resolveDatabaseConfig();
 
-// Validate database configuration
-const requiredDbVariables = [
-    "MYSQL_USER",
-    "MYSQL_PASSWORD",
-    "MYSQL_DATABASE"
-];
+// Safe diagnostics: never print credentials.
 
-for (const key of requiredDbVariables) {
-    if (!dbEnv[key]?.trim()) {
-        throw new Error(
-            `Missing database configuration: ${key}`
-        );
-    }
-}
-
-// Initialize Prisma MariaDB Adapter
-const adapter = new PrismaMariaDb({
-    host: "127.0.0.1",
-    port: 3307,
-
-    user: dbEnv.MYSQL_USER,
-    password: dbEnv.MYSQL_PASSWORD,
-    database: dbEnv.MYSQL_DATABASE,
-
-    allowPublicKeyRetrieval: true,
-    
-    connectionLimit: 5,
-    connectTimeout: 10000,
-    acquireTimeout: 15000
+export const databaseInfo = Object.freeze({
+    target: config.target,
+    host: config.host,
+    port: config.port,
+    database: config.database,
+    tlsEnabled: Boolean(config.ssl),
+    customCA: Boolean(config.caPath)
 });
+
+// ==========================================
+// PRISMA DRIVER ADAPTER
+// ==========================================
+
+const adapter = new PrismaMariaDb({
+    host: config.host,
+    port: config.port,
+
+    user: config.user,
+    password: config.password,
+    database: config.database,
+
+    ssl: config.ssl,
+
+    allowPublicKeyRetrieval:
+        config.allowPublicKeyRetrieval,
+
+    connectionLimit:
+        config.connectionLimit,
+
+    connectTimeout: 15000,
+    acquireTimeout: 20000
+});
+
+// ==========================================
+// PRISMA CLIENT
+// ==========================================
 
 export const prisma = new PrismaClient({
     adapter,
-
     log: ["warn", "error"]
 });
+
+console.log("[DATABASE] Target:", databaseInfo.target);
+console.log("[DATABASE] Host:", databaseInfo.host);
+console.log("[DATABASE] Port:", databaseInfo.port);
+console.log("[DATABASE] Name:", databaseInfo.database);
+console.log("[DATABASE] TLS:", databaseInfo.tlsEnabled);
+console.log("[DATABASE] Custom CA:", databaseInfo.customCA);

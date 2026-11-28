@@ -1,77 +1,51 @@
 
-import dotenv from "dotenv";
-import { fileURLToPath } from "node:url";
 import { defineConfig } from "prisma/config";
 
-// ==========================================
-// ENVIRONMENT CONFIGURATION
-// ==========================================
-
-dotenv.config({
-    path: fileURLToPath(
-        new URL("../.env", import.meta.url)
-    ),
-    quiet: true
-});
+import {
+    resolveDatabaseConfig
+} from "./src/config/database.js";
 
 // ==========================================
 // DATABASE CONFIGURATION
 // ==========================================
 
-const host = process.env.DB_HOST || "127.0.0.1";
-const port = process.env.DB_PORT || "3307";
+const config = resolveDatabaseConfig();
 
-const user = process.env.MYSQL_USER;
-const password = process.env.MYSQL_PASSWORD;
-const database = process.env.MYSQL_DATABASE;
-
-const shadowDatabase =
-    process.env.MYSQL_SHADOW_DATABASE ||
-    "note_app_shadow";
+const databaseUrl = new URL(config.url);
 
 // ==========================================
-// CONFIGURATION VALIDATION
+// CLOUD TLS CONFIGURATION
 // ==========================================
 
-if (!user || !password || !database) {
-    throw new Error(
-        "Missing MySQL configuration in root .env"
+if (config.target === "cloud") {
+    databaseUrl.searchParams.delete("sslidentity");
+    databaseUrl.searchParams.delete("sslpassword");
+    databaseUrl.searchParams.delete("sslcert");
+
+    databaseUrl.searchParams.set(
+        "sslaccept",
+        "strict"
     );
-}
 
-const portNumber = Number(port);
-
-if (
-    !Number.isInteger(portNumber) ||
-    portNumber < 1 ||
-    portNumber > 65535
-) {
-    throw new Error("Invalid database port.");
-}
-
-if (database === shadowDatabase) {
-    throw new Error(
-        "Main and shadow databases must be different."
-    );
+    if (config.caPath) {
+        databaseUrl.searchParams.set(
+            "sslcert",
+            config.caPath
+        );
+    }
 }
 
 // ==========================================
-// DATABASE CONNECTION URLS
+// SAFE DATABASE INFORMATION
 // ==========================================
 
-const baseUrl =
-    `mysql://${encodeURIComponent(user)}` +
-    `:${encodeURIComponent(password)}` +
-    `@${host}:${port}`;
-
-const databaseUrl =
-    `${baseUrl}/${encodeURIComponent(database)}`;
-
-const shadowDatabaseUrl =
-    `${baseUrl}/${encodeURIComponent(shadowDatabase)}`;
+console.log("[DATABASE] Target:", config.target);
+console.log("[DATABASE] Host:", config.host);
+console.log("[DATABASE] Port:", config.port);
+console.log("[DATABASE] Name:", config.database);
 
 // ==========================================
-// PRISMA CONFIGURATION
+// PRISMA CLI CONFIGURATION
 // ==========================================
 
 export default defineConfig({
@@ -82,7 +56,13 @@ export default defineConfig({
     },
 
     datasource: {
-        url: databaseUrl,
-        shadowDatabaseUrl: shadowDatabaseUrl
+        url: databaseUrl.toString(),
+
+        ...(config.target === "local"
+            ? {
+                shadowDatabaseUrl:
+                    config.shadowDatabaseUrl
+            }
+            : {})
     }
 });
