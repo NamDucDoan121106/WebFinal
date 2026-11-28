@@ -1,0 +1,93 @@
+
+services:
+  # ==========================================
+  # MYSQL DATABASE
+  # ==========================================
+  db:
+    image: mysql:8.0
+
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Required}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:?Required}
+      MYSQL_USER: ${MYSQL_USER:?Required}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Required}
+
+    ports:
+      - "127.0.0.1:3307:3306"
+
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - "mysqladmin ping -h localhost --silent"
+
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # ==========================================
+  # WEBFINAL APPLICATION
+  # ==========================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    image: webfinal-app:1.0
+
+    restart: unless-stopped
+
+    ports:
+      - "127.0.0.1:3000:3000"
+
+    env_file:
+      - ./server/.env
+
+    environment:
+      NODE_ENV: "development"
+
+      PORT: "3000"
+
+      SERVE_CLIENT: "true"
+
+      APP_URL: "http://localhost:3000"
+
+      DB_TARGET: "local"
+
+      DB_HOST: "db"
+
+      DB_PORT: "3306"
+
+      DB_SSL: "false"
+
+      MYSQL_USER: "${MYSQL_USER:?Required}"
+
+      MYSQL_PASSWORD: "${MYSQL_PASSWORD:?Required}"
+
+      MYSQL_DATABASE: "${MYSQL_DATABASE:?Required}"
+
+      MYSQL_SHADOW_DATABASE: "note_app_shadow"
+
+      DATABASE_URL: "mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}"
+
+      MAIL_PROVIDER: "smtp"
+
+    depends_on:
+      db:
+        condition: service_healthy
+
+    command:
+      - sh
+      - -c
+      - npx prisma migrate deploy && exec npm start
+
+# ==========================================
+# PERSISTENT DATABASE STORAGE
+# ==========================================
+volumes:
+  mysql_data:

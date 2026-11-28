@@ -1,0 +1,97 @@
+.note-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    min-height: 48px;
+    padding: 10px 14px;
+
+    background: var(--account-input);
+    color: var(--account-text);
+
+    border: 1px solid var(--account-border);
+    border-radius: 10px;
+}
+
+.note-search-bar:focus-within {
+    border-color: #2563eb;
+    outline: 2px solid #60a5fa;
+}
+
+.note-search-bar svg {
+    flex-shrink: 0;
+    color: var(--account-muted);
+}
+
+.note-search-bar input {
+    flex: 1;
+    min-width: 0;
+    padding: 4px;
+
+    background: transparent;
+    color: var(--account-text);
+
+    border: 0;
+    outline: none;
+
+    font: inherit;
+}
+
+.note-search-bar button {
+    background: transparent;
+    color: var(--account-link);
+
+    border: 0;
+    padding: 8px;
+
+    cursor: pointer;
+}
+
+.note-filter {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+
+    margin: 18px 0;
+}
+
+.filter-chip {
+    min-height: 38px;
+    padding: 8px 15px;
+
+    background: var(--account-surface);
+    color: var(--account-text);
+
+    border: 1px solid var(--account-border);
+    border-radius: 999px;
+
+    font: inherit;
+    font-size: 14px;
+
+    cursor: pointer;
+    overflow-wrap: anywhere;
+}
+
+.filter-chip:hover {
+    background: var(--account-readonly);
+}
+
+.filter-chip.active {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+}
+
+.filter-chip:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 2px;
+}
+
+@media (max-width: 480px) {
+    .filter-chip {
+        max-width: 100%;
+        min-height: 44px;
+    }
+}

@@ -1,0 +1,273 @@
+/* ======================================
+   LABEL MANAGEMENT
+   ====================================== */
+
+.labels-card {
+    max-width: 760px;
+}
+
+.label-create-form,
+.label-edit-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.label-create-form {
+    margin: 28px 0;
+}
+
+.label-create-form input,
+.label-edit-form input {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: 12px 14px;
+
+    border: 1px solid var(--account-border);
+    border-radius: 8px;
+
+    background: var(--account-input);
+    color: var(--account-text);
+
+    font: inherit;
+}
+
+.label-create-form input:focus-visible,
+.label-edit-form input:focus-visible,
+.labels-card button:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 2px;
+}
+
+/* BUTTONS */
+
+.label-primary,
+.label-secondary,
+.label-danger {
+    min-height: 40px;
+    padding: 10px 15px;
+    border-radius: 8px;
+
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.label-primary {
+    background: #2563eb;
+    color: #ffffff;
+    border: 1px solid #2563eb;
+}
+
+.label-primary:hover {
+    background: #1d4ed8;
+}
+
+.label-secondary {
+    background: var(--account-input);
+    color: var(--account-text);
+    border: 1px solid var(--account-border);
+}
+
+.label-secondary:hover {
+    background: var(--account-readonly);
+}
+
+.label-danger {
+    background: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.label-danger:hover {
+    background: #fee2e2;
+}
+
+.labels-card button:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+/* LABEL LIST */
+
+.label-list-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 14px 0;
+
+    border-bottom: 1px solid var(--account-border);
+}
+
+.label-list-header span {
+    color: var(--account-muted);
+    font-size: 13px;
+}
+
+.label-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.label-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    padding: 14px 0;
+
+    border-bottom: 1px solid var(--account-border);
+}
+
+.label-name {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    flex: 1;
+    min-width: 0;
+}
+
+.label-name svg {
+    color: var(--account-muted);
+    flex-shrink: 0;
+}
+
+.label-name span {
+    overflow-wrap: anywhere;
+    font-weight: 500;
+}
+
+.label-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.label-edit-form {
+    width: 100%;
+    min-width: 0;
+}
+
+/* EMPTY STATE */
+
+.label-empty {
+    padding: 42px 16px;
+    text-align: center;
+    color: var(--account-muted);
+}
+
+.label-empty strong {
+    color: var(--account-text);
+}
+
+/* DELETE CONFIRMATION */
+
+.label-confirmation {
+    margin-top: 24px;
+    padding: 20px;
+
+    border: 1px solid var(--account-border);
+    border-radius: 12px;
+
+    background: var(--account-input);
+}
+
+.label-confirmation h3 {
+    margin: 0 0 10px;
+}
+
+.label-confirmation p {
+    color: var(--account-muted);
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.label-confirmation .label-actions {
+    justify-content: flex-end;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 540px) {
+    .label-create-form,
+    .label-edit-form {
+        flex-wrap: wrap;
+    }
+
+    .label-create-form input,
+    .label-edit-form input {
+        flex-basis: 100%;
+    }
+
+    .label-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .label-actions {
+        width: 100%;
+    }
+
+    .label-actions button {
+        flex: 1;
+    }
+
+    .label-confirmation {
+        padding: 16px;
+    }
+}
+/* NOTE LABEL PICKER */
+
+.note-label-picker {
+    padding: 16px;
+    border: 1px solid var(--account-border);
+    border-radius: 12px;
+    background: var(--account-surface);
+    color: var(--account-text);
+}
+
+.note-label-picker h3 {
+    margin: 0 0 14px;
+    font-size: 16px;
+}
+
+.note-label-options {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.note-label-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-height: 40px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.note-label-option:hover {
+    background: var(--account-readonly);
+}
+
+.note-label-option input {
+    width: 18px;
+    height: 18px;
+    accent-color: #2563eb;
+}
+
+.note-label-option span {
+    overflow-wrap: anywhere;
+}
+
+.note-label-option:has(input:disabled) {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
