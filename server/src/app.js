@@ -1,4 +1,4 @@
-
+import labelRoutes from "./routes/label.routes.js";
 import express from "express";
 import helmet from "helmet";
 import cookieParser from "cookie-parser";
@@ -102,6 +102,12 @@ app.use("/api/auth", authRoutes);
 
 app.use("/api/users", userRoutes);
 
+app.use("/api/labels", (req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    next();
+});
+
+app.use("/api/labels", labelRoutes);
 // ==========================================
 // FUTURE MODULES
 // ==========================================
