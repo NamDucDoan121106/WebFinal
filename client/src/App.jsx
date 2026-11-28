@@ -1,11 +1,25 @@
+import ProfilePage
+    from "./account/ProfilePage.jsx";
 
+import ChangePasswordPage
+    from "./account/ChangePasswordPage.jsx";
+
+import PreferencesPage
+    from "./account/PreferencesPage.jsx";
+
+import PreferencesProvider
+    from "./account/PreferencesProvider.jsx";
+
+import Avatar
+    from "./account/Avatar.jsx";
 import { useState } from "react";
 
 import {
     BrowserRouter,
     Routes,
     Route,
-    Navigate
+    Navigate,
+    Link
 } from "react-router-dom";
 
 import {
@@ -26,11 +40,16 @@ import "./auth/auth.css";
 // TEMPORARY DASHBOARD
 // ==========================================
 
+
 function Dashboard() {
     const { user, notice, logout } = useAuth();
 
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
+
+    const initial = (
+        user?.display_name || "U"
+    ).charAt(0).toUpperCase();
 
     async function handleLogout() {
         if (submitting) return;
@@ -51,92 +70,257 @@ function Dashboard() {
     }
 
     return (
-        <main className="home-page">
+        <div className="workspace-layout">
 
-            <header className="home-header">
-                <h1>Note App</h1>
+            {/* SIDEBAR */}
+
+            <aside className="workspace-sidebar">
+
+                <Link to="/" className="workspace-brand">
+                    Note App
+                </Link>
+
+                <div className="workspace-menu">
+
+                    <span className="workspace-menu-label">
+                        WORKSPACE
+                    </span>
+
+                    <Link
+                        to="/"
+                        className="workspace-link active"
+                    >
+                        Dashboard
+                    </Link>
+
+                    <span
+                        className="workspace-link disabled"
+                        aria-disabled="true"
+                    >
+                        My Notes
+                        <small>Coming soon</small>
+                    </span>
+
+                    <span className="workspace-menu-label">
+                        ACCOUNT
+                    </span>
+
+                    <Link
+                        to="/profile"
+                        className="workspace-link"
+                    >
+                        My Profile
+                    </Link>
+
+                    <Link
+                        to="/change-password"
+                        className="workspace-link"
+                    >
+                        Change Password
+                    </Link>
+
+                    <Link
+                        to="/preferences"
+                        className="workspace-link"
+                    >
+                        Preferences
+                    </Link>
+
+                </div>
 
                 <button
                     type="button"
+                    className="workspace-logout"
                     onClick={handleLogout}
                     disabled={submitting}
                 >
-                    {submitting
-                        ? "Signing out..."
-                        : "Sign out"}
+                    {submitting ? "Signing out..." : "Sign out"}
                 </button>
-            </header>
 
-            <UnverifiedBanner />
+            </aside>
 
-            {notice && (
-                <div
-                    className="auth-success"
-                    role="status"
-                >
-                    {notice}
-                </div>
-            )}
+            {/* MAIN CONTENT */}
 
-            {error && (
-                <div
-                    className="auth-error"
-                    role="alert"
-                >
-                    {error}
-                </div>
-            )}
+            <main className="workspace-main">
 
-            <section className="welcome-card">
+                <header className="workspace-header">
 
-                <h2>
-                    Welcome, {user?.display_name || "User"}!
+                    <div>
+                        <h1>
+                            Welcome, {user?.display_name || "User"}!
+                        </h1>
+
+                        <p>
+                            Manage your account and personal workspace.
+                        </p>
+                    </div>
+
+                    <Link
+                        to="/profile"
+                        className="workspace-avatar"
+                        aria-label="Open profile"
+                    >
+                        {user?.avatar_url ? (
+                            <img
+                                src={user.avatar_url}
+                                alt="User avatar"
+                            />
+                        ) : (
+                            initial
+                        )}
+                    </Link>
+
+                </header>
+
+                <UnverifiedBanner />
+
+                {notice && (
+                    <div className="auth-success" role="status">
+                        {notice}
+                    </div>
+                )}
+
+                {error && (
+                    <div className="auth-error" role="alert">
+                        {error}
+                    </div>
+                )}
+
+                {/* ACCOUNT INFORMATION */}
+
+                <section className="workspace-account">
+
+                    <h2>Account overview</h2>
+
+                    <div className="workspace-user-grid">
+
+                        <div>
+                            <span>Display name</span>
+                            <strong>{user?.display_name}</strong>
+                        </div>
+
+                        <div>
+                            <span>Email address</span>
+                            <strong>{user?.email}</strong>
+                        </div>
+
+                        <div>
+                            <span>User ID</span>
+                            <strong>{user?.id}</strong>
+                        </div>
+
+                        <div>
+                            <span>Account status</span>
+
+                            <strong
+                                className={
+                                    user?.is_verified
+                                        ? "workspace-verified"
+                                        : "workspace-unverified"
+                                }
+                            >
+                                {user?.is_verified
+                                    ? "Verified"
+                                    : "Not verified"}
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </section>
+
+                {/* QUICK ACTIONS */}
+
+                <h2 className="workspace-section-title">
+                    Quick actions
                 </h2>
 
-                <p>
-                    Your account is connected successfully.
-                </p>
+                <section className="workspace-actions">
 
-                <div className="user-information">
+                    <Link
+                        to="/profile"
+                        className="workspace-action-card"
+                    >
+                        <span className="workspace-action-icon">
+                            👤
+                        </span>
 
-                    <p>
-                        <strong>User ID:</strong>{" "}
-                        {user?.id}
-                    </p>
+                        <h3>My Profile</h3>
 
-                    <p>
-                        <strong>Display name:</strong>{" "}
-                        {user?.display_name}
-                    </p>
+                        <p>
+                            Update your display name and profile picture.
+                        </p>
 
-                    <p>
-                        <strong>Email:</strong>{" "}
-                        {user?.email}
-                    </p>
+                        <span className="workspace-action-text">
+                            Manage profile →
+                        </span>
+                    </Link>
 
-                    <p>
-                        <strong>Account status:</strong>{" "}
-                        {user?.is_verified
-                            ? "Verified"
-                            : "Not verified"}
-                    </p>
+                    <Link
+                        to="/change-password"
+                        className="workspace-action-card"
+                    >
+                        <span className="workspace-action-icon">
+                            🔒
+                        </span>
 
-                </div>
+                        <h3>Account Security</h3>
 
-                <hr />
+                        <p>
+                            Change your password and secure your account.
+                        </p>
 
-                <h3>Your notes</h3>
+                        <span className="workspace-action-text">
+                            Change password →
+                        </span>
+                    </Link>
 
-                <p>
-                    Note management features will be
-                    integrated in the next phase.
-                </p>
+                    <Link
+                        to="/preferences"
+                        className="workspace-action-card"
+                    >
+                        <span className="workspace-action-icon">
+                            ⚙️
+                        </span>
 
-            </section>
+                        <h3>Preferences</h3>
 
-        </main>
+                        <p>
+                            Customize your personal application settings.
+                        </p>
+
+                        <span className="workspace-action-text">
+                            Open settings →
+                        </span>
+                    </Link>
+
+                    <div className="workspace-action-card coming-soon">
+
+                        <span className="workspace-action-icon">
+                            📝
+                        </span>
+
+                        <h3>My Notes</h3>
+
+                        <p>
+                            Create, organize and manage your notes.
+                        </p>
+
+                        <span className="workspace-coming-soon">
+                            Coming soon
+                        </span>
+
+                    </div>
+
+                </section>
+
+            </main>
+
+        </div>
     );
 }
+
 
 // ==========================================
 // APPLICATION ROUTING
@@ -145,73 +329,76 @@ function Dashboard() {
 export default function App() {
     return (
         <BrowserRouter>
+
             <AuthProvider>
-                <Routes>
 
-                    {/* ========================== */}
-                    {/* PUBLIC ROUTES              */}
-                    {/* ========================== */}
+                <PreferencesProvider>
 
-                    <Route
-                        path="/login"
-                        element={
-                            <AuthPage
-                                key="login"
-                                mode="login"
-                            />
-                        }
-                    />
-
-                    <Route
-                        path="/register"
-                        element={
-                            <AuthPage
-                                key="register"
-                                mode="register"
-                            />
-                        }
-                    />
-
-                    {/* Email verification */}
-
-                    <Route
-                        path="/verify/:token"
-                        element={<VerifyPage />}
-                    />
-
-                    {/* Forgot and reset password */}
-
-                    <Route
-                        path="/forgot-password"
-                        element={<ForgotPassword />}
-                    />
-
-                    {/* ========================== */}
-                    {/* PROTECTED ROUTES           */}
-                    {/* ========================== */}
-
-                    <Route element={<ProtectedRoute />}>
+                    <Routes>
 
                         <Route
-                            path="/"
-                            element={<Dashboard />}
+                            path="/login"
+                            element={
+                                <AuthPage
+                                    key="login"
+                                    mode="login"
+                                />
+                            }
                         />
 
-                    </Route>
+                        <Route
+                            path="/register"
+                            element={
+                                <AuthPage
+                                    key="register"
+                                    mode="register"
+                                />
+                            }
+                        />
 
-                    {/* ========================== */}
-                    {/* FALLBACK ROUTE             */}
-                    {/* ========================== */}
+                        <Route
+                            path="/verify/:token"
+                            element={<VerifyPage />}
+                        />
 
-                    <Route
-                        path="*"
-                        element={
-                            <Navigate to="/" replace />
-                        }
-                    />
+                        <Route
+                            path="/forgot-password"
+                            element={<ForgotPassword />}
+                        />
 
-                </Routes>
+                        <Route element={<ProtectedRoute />}>
+
+                            <Route path="/" element={<Dashboard />} />
+                            <Route
+                                path="/profile"
+                                element={<ProfilePage />}
+                            />
+
+                            <Route
+                                path="/change-password"
+                                element={<ChangePasswordPage />}
+                            />
+
+                            <Route
+                                path="/preferences"
+                                element={<PreferencesPage />}
+                            />
+
+                            <Route
+                                path="*"
+                                element={
+                                    <Navigate to="/" replace />
+                                }
+                            />
+
+                        </Route>
+
+                    </Routes>
+
+                </PreferencesProvider>
+
             </AuthProvider>
+
         </BrowserRouter>
     );
 }
