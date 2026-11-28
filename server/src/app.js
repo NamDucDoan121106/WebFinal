@@ -1,3 +1,5 @@
+import noteLabelRoutes
+    from "./routes/note-label.routes.js";
 import labelRoutes from "./routes/label.routes.js";
 import express from "express";
 import helmet from "helmet";
@@ -108,6 +110,8 @@ app.use("/api/labels", (req, res, next) => {
 });
 
 app.use("/api/labels", labelRoutes);
+
+app.use("/api/notes", noteLabelRoutes);
 // ==========================================
 // FUTURE MODULES
 // ==========================================
