@@ -21,6 +21,20 @@ export function errorHandler(err, req, res, next) {
     if (res.headersSent) {
         return next(err);
     }
+    if (err.name === "MulterError") {
+    
+    if (err.code === "LIMIT_FILE_SIZE") {
+        return res.status(413).json({
+            success: false,
+            message: "Avatar must not exceed 2 MB."
+        });
+    }
+
+    return res.status(400).json({
+        success: false,
+        message: "Invalid avatar upload request."
+    });
+}
 
     if (err instanceof ZodError) {
         return res.status(422).json({

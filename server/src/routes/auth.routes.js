@@ -1,3 +1,4 @@
+
 import { Router } from "express";
 
 import {
@@ -21,52 +22,73 @@ import {
 import {
     loginLimiter,
     registerLimiter,
-
     forgotLimiter,
     forgotAccountLimiter,
-
     verifyOTPLimiter,
     verifyOTPAccountLimiter,
-
     resetPasswordLimiter
 } from "../middleware/rate-limit.middleware.js";
 
 const router = Router();
 
-// Registration
+// ==========================================
+// REGISTER
+// POST /api/auth/register
+// ==========================================
+
 router.post(
     "/register",
     registerLimiter,
     register
 );
 
-// Login
+// ==========================================
+// LOGIN
+// POST /api/auth/login
+// ==========================================
+
 router.post(
     "/login",
     loginLimiter,
     login
 );
 
-// Logout
+// ==========================================
+// LOGOUT
+// POST /api/auth/logout
+// ==========================================
+
 router.post(
     "/logout",
     logout
 );
 
-// Current user
+// ==========================================
+// CURRENT USER
+// GET /api/auth/me
+// ==========================================
+
 router.get(
     "/me",
     requireAuth,
     me
 );
 
-// Account activation
+// ==========================================
+// EMAIL VERIFICATION
+// GET /api/auth/verify/:token
+// ==========================================
+
 router.get(
     "/verify/:token",
     verifyAccount
 );
 
-// Request password reset
+// ==========================================
+// FORGOT PASSWORD
+// POST /api/auth/forgot
+// ==========================================
+
 router.post(
     "/forgot",
     forgotLimiter,
@@ -74,7 +96,11 @@ router.post(
     forgotPassword
 );
 
-// Verify OTP
+// ==========================================
+// VERIFY OTP
+// POST /api/auth/verify-otp
+// ==========================================
+
 router.post(
     "/verify-otp",
     verifyOTPLimiter,
@@ -82,7 +108,11 @@ router.post(
     verifyOTP
 );
 
-// Reset password
+// ==========================================
+// RESET PASSWORD
+// POST /api/auth/reset
+// ==========================================
+
 router.post(
     "/reset",
     resetPasswordLimiter,

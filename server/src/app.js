@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import { env } from "./config/env.js";
 
 import authRoutes from "./routes/auth.routes.js";
+import userRoutes from "./routes/user.routes.js";
 
 import {
     AppError,
@@ -15,21 +16,32 @@ import {
 
 const app = express();
 
+// ==========================================
+// SECURITY AND GLOBAL MIDDLEWARE
+// ==========================================
+
 app.disable("x-powered-by");
 
-app.use(helmet({
-    referrerPolicy: {
-        policy: "no-referrer"
-    }
-}));
+app.use(
+    helmet({
+        referrerPolicy: {
+            policy: "no-referrer"
+        }
+    })
+);
 
-app.use(express.json({
-    limit: "100kb"
-}));
+app.use(
+    express.json({
+        limit: "100kb"
+    })
+);
 
 app.use(cookieParser());
 
-// Basic same-origin protection for browser mutations.
+// ==========================================
+// SAME-ORIGIN PROTECTION
+// ==========================================
+
 app.use("/api", (req, res, next) => {
     const safeMethods = [
         "GET",
@@ -51,32 +63,64 @@ app.use("/api", (req, res, next) => {
         (origin && origin !== allowedOrigin)
     ) {
         return next(
-            new AppError("Forbidden request origin.", 403)
+            new AppError(
+                "Forbidden request origin.",
+                403
+            )
         );
     }
 
     next();
 });
 
-// Do not cache authentication responses.
+// ==========================================
+// CACHE PROTECTION
+// ==========================================
+
 app.use("/api/auth", (req, res, next) => {
     res.set("Cache-Control", "no-store");
-
     next();
 });
 
-// Authentication module
+app.use("/api/users", (req, res, next) => {
+    res.set("Cache-Control", "no-store");
+    next();
+});
+
+// ==========================================
+// API ROUTES
+// ==========================================
+
+// Authentication:
+// Register, login, logout, current user,
+// email verification and password recovery.
+
 app.use("/api/auth", authRoutes);
 
-// Future modules:
-// app.use("/api/users", userRoutes);
+// User account:
+// Profile, avatar, password and preferences.
+
+app.use("/api/users", userRoutes);
+
+// ==========================================
+// FUTURE MODULES
+// ==========================================
+
 // app.use("/api/labels", labelRoutes);
 // app.use("/api/notes", noteRoutes);
+// app.use("/api/attachments", attachmentRoutes);
+// app.use("/api/shares", shareRoutes);
 
-// Unknown routes
+// ==========================================
+// UNKNOWN ROUTES
+// ==========================================
+
 app.use(notFound);
 
-// Global error handling
+// ==========================================
+// GLOBAL ERROR HANDLING
+// ==========================================
+
 app.use(errorHandler);
 
 export default app;

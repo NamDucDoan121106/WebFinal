@@ -122,3 +122,34 @@ export const resetPasswordLimiter = rateLimit({
         message: "Too many reset attempts. Please try again later."
     }
 });
+export const profileUpdateLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 20,
+
+    keyGenerator: req =>
+        `profile:${req.auth.userId}`,
+
+    standardHeaders: "draft-7",
+    legacyHeaders: false,
+
+    message: {
+        success: false,
+        message: "Too many profile updates. Try again later."
+    }
+});
+
+export const changePasswordLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: 5,
+
+    keyGenerator: req =>
+        `password:${req.auth.userId}`,
+
+    standardHeaders: "draft-7",
+    legacyHeaders: false,
+
+    message: {
+        success: false,
+        message: "Too many password change attempts. Try again later."
+    }
+});

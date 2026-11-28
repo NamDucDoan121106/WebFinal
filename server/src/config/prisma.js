@@ -45,6 +45,8 @@ const adapter = new PrismaMariaDb({
     password: dbEnv.MYSQL_PASSWORD,
     database: dbEnv.MYSQL_DATABASE,
 
+    allowPublicKeyRetrieval: true,
+    
     connectionLimit: 5,
     connectTimeout: 10000,
     acquireTimeout: 15000
