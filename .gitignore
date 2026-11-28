@@ -6,10 +6,13 @@ node_modules/
 dist/
 build/
 
-# Environment variables
+# Environment variables and secrets
 .env
 .env.*
 !.env.example
+
+# Prisma generated client
+server/src/generated/prisma/
 
 # Logs
 *.log
@@ -26,18 +29,6 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Temporary uploads
+# Temporary files and uploads
 uploads/
 tmp/
-
-.env
-.env.*
-!.env.example
-
-node_modules/
-dist/
-build/
-*.log
-
-# Prisma generated client
-server/src/generated/prisma/
